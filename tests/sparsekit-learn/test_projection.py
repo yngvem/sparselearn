@@ -15,7 +15,7 @@ from sparselearn import projections
 
 def perturb_normally(x, rate):
     xnorm = np.linalg.norm(x)
-    rate /= xnorm
+    rate /= xnorm + 1e-16
 
     return x + rate*np.random.standard_normal(x.shape)
 
@@ -85,4 +85,32 @@ class TestSimplexProjection(BaseTestProjection):
 
     def is_feasible(self, x, simplex_size):
         return abs(np.sum(x)-simplex_size) < 1e-8 and np.all(x >= 0)
+
+
+class BaseTestBallProjection(BaseTestProjection):
+    Projection = projections.BallProjection
+    projection_kwargs = [{'max_norm': 0.5}, {'max_norm': 1}, {'max_norm': 5}]
+
+
+class BaseTestLPBallProjection(BaseTestBallProjection):
+    Projection = projections.BallProjection
+    p = None
+
+    def is_feasible(self, x, max_norm):
+        return (np.linalg.norm(x, self.p) - max_norm) < 1e-10
+    
+
+class TestL1BallProjection(BaseTestLPBallProjection):
+    Projection = projections.L1Projection
+    p = 1
+
+
+class TestL2BallProjection(BaseTestLPBallProjection):
+    Projection = projections.L2Projection
+    p = 2
+
+
+class TestLInfBallProjection(BaseTestLPBallProjection):
+    Projection = projections.LInfProjection
+    p = np.inf
 
