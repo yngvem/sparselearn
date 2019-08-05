@@ -79,3 +79,10 @@ class TestNonNegativeProjection(BaseTestProjection):
         return np.all(x >= 0)
 
 
+class TestSimplexProjection(BaseTestProjection):
+    Projection = projections.SimplexProjection
+    projection_kwargs = [{'simplex_size': 0.5}, {'simplex_size': 1}, {'simplex_size': 5}]
+
+    def is_feasible(self, x, simplex_size):
+        return abs(np.sum(x)-simplex_size) < 1e-8 and np.all(x >= 0)
+
